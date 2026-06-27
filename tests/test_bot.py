@@ -21,6 +21,13 @@ def test_handle_message_unknown_returns_bailey_message():
     assert "Bailey" in result or "ไม่แน่ใจ" in result
 
 
-def test_handle_message_phase2_agent_returns_coming_soon():
-    result = bot.handle_message("George: จองโรงแรม")
+def test_handle_message_routes_to_george():
+    with patch("agents.george.handle", return_value="george response") as mock_george:
+        result = bot.handle_message("George: จองโรงแรม")
+        assert result == "george response"
+        mock_george.assert_called_once_with("จองโรงแรม")
+
+
+def test_handle_message_phase2_arizona_returns_coming_soon():
+    result = bot.handle_message("Arizona: เครียดมาก")
     assert "Phase 2" in result or "ยังไม่พร้อม" in result

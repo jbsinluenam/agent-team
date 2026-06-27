@@ -8,5 +8,7 @@ for _key in [
     "GOOGLE_SHEETS_CREDENTIALS_JSON",
     "NOTION_TOKEN",
     "NOTION_IDEAS_DB_ID",
+    "NOTION_TRIPS_DB_ID",
+    "NOTION_BOOKINGS_DB_ID",
 ]:
     os.environ.setdefault(_key, "test")

@@ -1,5 +1,11 @@
 import os
+import re
 from notion_client import Client
+
+_UUID_RE = re.compile(
+    r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$",
+    re.IGNORECASE,
+)
 
 
 class NotionClient:
@@ -86,15 +92,23 @@ class NotionClient:
         return page.get("id", "")
 
     def get_trip(self, name_or_id: str) -> dict | None:
-        results = self._client.databases.query(
-            database_id=self._trips_db_id,
-            filter={"property": "Title", "title": {"contains": name_or_id}},
-        )
-        if not results["results"]:
-            return None
+        if _UUID_RE.match(name_or_id):
+            page = self._client.pages.retrieve(page_id=name_or_id)
+            if not page:
+                return None
+            pages = [page]
+            trip_id = page["id"]
+        else:
+            results = self._client.databases.query(
+                database_id=self._trips_db_id,
+                filter={"property": "Title", "title": {"contains": name_or_id}},
+            )
+            if not results["results"]:
+                return None
+            pages = results["results"]
+            trip_id = pages[0]["id"]
 
-        page = results["results"][0]
-        trip_id = page["id"]
+        page = pages[0]
         props = page["properties"]
 
         bookings_result = self._client.databases.query(

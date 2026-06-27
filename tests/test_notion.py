@@ -148,6 +148,32 @@ def test_get_trip_returns_none_when_not_found():
         assert result is None
 
 
+def test_get_trip_by_uuid_calls_pages_retrieve():
+    with patch("core.notion.Client") as MockClient:
+        mock_notion = MagicMock()
+        MockClient.return_value = mock_notion
+        mock_notion.pages.retrieve.return_value = {
+            "id": "12345678-1234-1234-1234-123456789abc",
+            "properties": {
+                "Title": {"title": [{"plain_text": "Bali Jul 2026"}]},
+                "Destination": {"rich_text": [{"plain_text": "Bali"}]},
+                "Status": {"select": {"name": "Planning"}},
+                "Budget": {"number": None},
+                "Travelers": {"number": None},
+            },
+        }
+        mock_notion.databases.query.return_value = {"results": []}
+
+        from core.notion import NotionClient
+        client = NotionClient(token="t", ideas_db_id="i", trips_db_id="trips-db", bookings_db_id="bk-db")
+        trip = client.get_trip("12345678-1234-1234-1234-123456789abc")
+
+        mock_notion.pages.retrieve.assert_called_once_with(page_id="12345678-1234-1234-1234-123456789abc")
+        assert trip is not None
+        assert trip["title"] == "Bali Jul 2026"
+        assert trip["bookings"] == []
+
+
 def test_get_trip_returns_trip_with_bookings():
     with patch("core.notion.Client") as MockClient:
         mock_notion = MagicMock()

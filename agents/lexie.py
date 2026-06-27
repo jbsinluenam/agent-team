@@ -1,4 +1,3 @@
-import os
 from core.notion import NotionClient
 
 _client = None

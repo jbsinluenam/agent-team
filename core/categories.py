@@ -24,5 +24,7 @@ PAYMENT_TO_ACCOUNT = {
     "": "SCB Savings",
     "KTC ROP": "KTC ROP",
     "TTB Absolute": "TTB Absolute",
+    "CardX": "CardX",
+    "Cash": "Cash",
     "Paotang": "Paotang",
 }

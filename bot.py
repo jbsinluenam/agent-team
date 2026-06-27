@@ -25,6 +25,7 @@ app = Flask(__name__)
 _line_config = Configuration(access_token=os.environ.get("LINE_CHANNEL_ACCESS_TOKEN", ""))
 _line_handler = WebhookHandler(os.environ.get("LINE_CHANNEL_SECRET", ""))
 _telegram_token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_SECRET = os.environ.get("TELEGRAM_WEBHOOK_SECRET", "")
 
 
 def handle_message(raw_text: str) -> str:
@@ -72,6 +73,10 @@ def on_line_message(event):
 
 @app.route("/callback/telegram", methods=["POST"])
 def telegram_callback():
+    if TELEGRAM_SECRET:
+        token = request.headers.get("X-Telegram-Bot-Api-Secret-Token", "")
+        if token != TELEGRAM_SECRET:
+            abort(403)
     data = request.get_json(silent=True) or {}
     msg = data.get("message", {})
     chat_id = msg.get("chat", {}).get("id")
@@ -82,11 +87,15 @@ def telegram_callback():
         reply = handle_message(text)
     except Exception:
         reply = "เกิดข้อผิดพลาด ลองใหม่นะ"
-    requests.post(
-        f"https://api.telegram.org/bot{_telegram_token}/sendMessage",
-        json={"chat_id": chat_id, "text": reply},
-        timeout=10,
-    )
+    try:
+        resp = requests.post(
+            f"https://api.telegram.org/bot{_telegram_token}/sendMessage",
+            json={"chat_id": chat_id, "text": reply},
+            timeout=10,
+        )
+        resp.raise_for_status()
+    except Exception:
+        pass
     return "OK"
 
 

@@ -92,6 +92,9 @@ def _balance(client: SheetsClient) -> str:
     return "\n".join(lines)
 
 
+CREDIT_ACCOUNTS = {"KTC ROP", "TTB Absolute", "CardX"}
+
+
 def _record_expense(result: dict, client: SheetsClient) -> str:
     category = result["category"] or "อื่นๆ"
     client.append_transaction(
@@ -105,7 +108,7 @@ def _record_expense(result: dict, client: SheetsClient) -> str:
     )
 
     account = PAYMENT_TO_ACCOUNT.get(result["payment"], "SCB Savings")
-    delta = -result["amount"] if account == "SCB Savings" else result["amount"]
+    delta = result["amount"] if account in CREDIT_ACCOUNTS else -result["amount"]
     direction = "หักจาก" if delta < 0 else "บวกเข้า"
     icon = "📤" if delta < 0 else "📥"
     account_line = f"\n{icon} {direction} {account} {abs(delta):,.0f} บาท"
@@ -113,8 +116,8 @@ def _record_expense(result: dict, client: SheetsClient) -> str:
         new_balance = client.update_account_balance(account, delta)
         if new_balance is not None:
             account_line += f" (คงเหลือ {new_balance:,.0f} บาท)"
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"[april] warning: {e}")
 
     budget_line = ""
     try:
@@ -130,8 +133,8 @@ def _record_expense(result: dict, client: SheetsClient) -> str:
                 budget_line += "\n🚨 เกิน budget แล้ว!"
             elif pct >= 80:
                 budget_line += "\n⚠️ ใช้ไปเกิน 80% แล้ว"
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"[april] warning: {e}")
 
     payment_str = f" 💳 {result['payment']}" if result["payment"] else ""
     return (
@@ -155,8 +158,8 @@ def _record_income(result: dict, client: SheetsClient) -> str:
         new_balance = client.update_account_balance("SCB Savings", result["amount"])
         if new_balance is not None:
             balance_line = f" (คงเหลือ {new_balance:,.0f} บาท)"
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"[april] warning: {e}")
     return (
         f"✅ บันทึกแล้ว: {result['description']} {result['amount']:,.0f} บาท (Income)\n"
         f"📥 บวกเข้า SCB Savings {result['amount']:,.0f} บาท{balance_line}"

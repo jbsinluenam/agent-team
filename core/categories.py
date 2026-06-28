@@ -17,8 +17,9 @@ PAYMENT_MAP = {
     "cash": "Cash",
     "เงินสด": "Cash",
     "paotang": "Paotung",
-    "เป๋าตัง": "Paotung",
     "paotung": "Paotung",
+    "เป๋าตัง": "Paotung",
+    "เป่าตัง": "Paotung",
 }
 
 PAYMENT_TO_ACCOUNT = {

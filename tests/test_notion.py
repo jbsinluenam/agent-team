@@ -216,3 +216,87 @@ def test_get_trip_returns_trip_with_bookings():
         assert trip["budget"] == 50000
         assert len(trip["bookings"]) == 1
         assert trip["bookings"][0]["title"] == "Wyndham Bali"
+
+
+def test_log_mood_creates_page_with_properties():
+    with patch("core.notion.Client") as MockClient:
+        mock_notion = MagicMock()
+        MockClient.return_value = mock_notion
+        mock_notion.pages.create.return_value = {"id": "mood-123"}
+
+        from core.notion import NotionClient
+        client = NotionClient(token="t", ideas_db_id="i", trips_db_id="tr", bookings_db_id="bk", mood_log_db_id="ml-db")
+        page_id = client.log_mood(
+            entry="เครียดมากเรื่องงาน",
+            response="ฟังดูเหนื่อยมาก",
+            tags=["งาน"],
+            mood="negative",
+            date="2026-06-28",
+        )
+
+        assert page_id == "mood-123"
+        props = mock_notion.pages.create.call_args[1]["properties"]
+        assert props["Mood"]["select"]["name"] == "negative"
+        assert props["Tags"]["multi_select"][0]["name"] == "งาน"
+        assert props["Date"]["date"]["start"] == "2026-06-28"
+
+
+def test_log_mood_returns_page_id():
+    with patch("core.notion.Client") as MockClient:
+        mock_notion = MagicMock()
+        MockClient.return_value = mock_notion
+        mock_notion.pages.create.return_value = {"id": "xyz-mood"}
+
+        from core.notion import NotionClient
+        client = NotionClient(token="t", ideas_db_id="i", trips_db_id="tr", bookings_db_id="bk", mood_log_db_id="ml-db")
+        result = client.log_mood(
+            entry="โอเค",
+            response="ดีใจด้วยนะ",
+            tags=["ตัวเอง"],
+            mood="positive",
+            date="2026-06-28",
+        )
+
+        assert result == "xyz-mood"
+
+
+def test_recall_moods_filters_by_topic():
+    with patch("core.notion.Client") as MockClient:
+        mock_notion = MagicMock()
+        MockClient.return_value = mock_notion
+        mock_notion.databases.query.return_value = {
+            "results": [
+                {
+                    "properties": {
+                        "Date": {"date": {"start": "2026-06-27"}},
+                        "Entry": {"rich_text": [{"plain_text": "เครียดเรื่องงานมาก"}]},
+                        "Tags": {"multi_select": [{"name": "งาน"}]},
+                        "Mood": {"select": {"name": "negative"}},
+                    }
+                }
+            ]
+        }
+
+        from core.notion import NotionClient
+        client = NotionClient(token="t", ideas_db_id="i", trips_db_id="tr", bookings_db_id="bk", mood_log_db_id="ml-db")
+        entries = client.recall_moods("งาน")
+
+        assert len(entries) == 1
+        assert entries[0]["entry"] == "เครียดเรื่องงานมาก"
+        assert entries[0]["mood"] == "negative"
+        assert "งาน" in entries[0]["tags"]
+        call_kwargs = mock_notion.databases.query.call_args[1]
+        assert call_kwargs["database_id"] == "ml-db"
+
+
+def test_recall_moods_empty_returns_empty_list():
+    with patch("core.notion.Client") as MockClient:
+        mock_notion = MagicMock()
+        MockClient.return_value = mock_notion
+        mock_notion.databases.query.return_value = {"results": []}
+
+        from core.notion import NotionClient
+        client = NotionClient(token="t", ideas_db_id="i", trips_db_id="tr", bookings_db_id="bk", mood_log_db_id="ml-db")
+        entries = client.recall_moods("ครอบครัว")
+
+        assert entries == []

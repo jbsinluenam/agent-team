@@ -15,10 +15,12 @@ class NotionClient:
         ideas_db_id: str | None = None,
         trips_db_id: str | None = None,
         bookings_db_id: str | None = None,
+        mood_log_db_id: str | None = None,
     ):
         self._ideas_db_id = ideas_db_id or os.environ["NOTION_IDEAS_DB_ID"]
         self._trips_db_id = trips_db_id or os.environ.get("NOTION_TRIPS_DB_ID", "")
         self._bookings_db_id = bookings_db_id or os.environ.get("NOTION_BOOKINGS_DB_ID", "")
+        self._mood_log_db_id = mood_log_db_id or os.environ.get("NOTION_MOOD_LOG_DB_ID", "")
         self._client = Client(auth=token or os.environ["NOTION_TOKEN"])
 
     def add_idea(self, title: str, tags: list[str], source: str) -> str:
@@ -155,6 +157,49 @@ class NotionClient:
                 "title": _text(page["properties"].get("Title", {})),
                 "destination": _text(page["properties"].get("Destination", {})),
                 "status": (page["properties"].get("Status") or {}).get("select", {}).get("name", ""),
+            }
+            for page in results["results"]
+        ]
+
+    def log_mood(
+        self,
+        entry: str,
+        response: str,
+        tags: list[str],
+        mood: str,
+        date: str,
+    ) -> str:
+        title = f"{date} {entry[:30]}"
+        page = self._client.pages.create(
+            parent={"database_id": self._mood_log_db_id},
+            properties={
+                "Title": {"title": [{"text": {"content": title}}]},
+                "Entry": {"rich_text": [{"text": {"content": entry}}]},
+                "Response": {"rich_text": [{"text": {"content": response}}]},
+                "Tags": {"multi_select": [{"name": t} for t in tags]},
+                "Mood": {"select": {"name": mood}},
+                "Date": {"date": {"start": date}},
+            },
+        )
+        return page.get("id", "")
+
+    def recall_moods(self, topic: str, limit: int = 10) -> list[dict]:
+        results = self._client.databases.query(
+            database_id=self._mood_log_db_id,
+            filter={"property": "Tags", "multi_select": {"contains": topic}},
+            page_size=limit,
+        )
+
+        def _text(prop) -> str:
+            items = prop.get("rich_text") or prop.get("title") or []
+            return items[0]["plain_text"] if items else ""
+
+        return [
+            {
+                "date": (page["properties"].get("Date") or {}).get("date", {}).get("start", ""),
+                "entry": _text(page["properties"].get("Entry", {})),
+                "tags": [o["name"] for o in (page["properties"].get("Tags") or {}).get("multi_select", [])],
+                "mood": (page["properties"].get("Mood") or {}).get("select", {}).get("name", ""),
             }
             for page in results["results"]
         ]

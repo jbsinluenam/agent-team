@@ -64,8 +64,8 @@ def on_line_message(event):
     text = event.message.text.strip()
     try:
         reply = handle_message(text)
-    except Exception as e:
-        reply = f"เกิดข้อผิดพลาด: {type(e).__name__}: {str(e)[:120]}"
+    except Exception:
+        reply = "เกิดข้อผิดพลาด ลองใหม่นะ"
     with ApiClient(_line_config) as api_client:
         MessagingApi(api_client).reply_message(
             ReplyMessageRequest(

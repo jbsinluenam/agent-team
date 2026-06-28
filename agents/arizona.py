@@ -72,7 +72,11 @@ def _call_llm_support(text: str, llm) -> dict:
         system=_SUPPORT_SYSTEM,
         messages=[{"role": "user", "content": text}],
     )
-    return json.loads(message.content[0].text)
+    raw = message.content[0].text.strip()
+    if raw.startswith("```"):
+        raw = re.sub(r"^```(?:json)?\s*", "", raw)
+        raw = re.sub(r"\s*```$", "", raw)
+    return json.loads(raw)
 
 
 def _call_llm_recall(entries: list[dict], llm) -> str:

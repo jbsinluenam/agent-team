@@ -28,6 +28,8 @@ def test_handle_message_routes_to_george():
         mock_george.assert_called_once_with("จองโรงแรม")
 
 
-def test_handle_message_phase2_arizona_returns_coming_soon():
-    result = bot.handle_message("Arizona: เครียดมาก")
-    assert "Phase 2" in result or "ยังไม่พร้อม" in result
+def test_handle_message_routes_to_arizona():
+    with patch("agents.arizona.handle", return_value="arizona response") as mock_arizona:
+        result = bot.handle_message("Arizona: เครียดมาก")
+        assert result == "arizona response"
+        mock_arizona.assert_called_once_with("เครียดมาก")

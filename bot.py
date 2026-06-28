@@ -18,6 +18,7 @@ import router.bailey as bailey
 import agents.april as april
 import agents.lexie as lexie
 import agents.george as george
+import agents.arizona as arizona
 
 load_dotenv()
 
@@ -38,6 +39,8 @@ def handle_message(raw_text: str) -> str:
         return lexie.handle(text)
     if agent_name == "george":
         return george.handle(text)
+    if agent_name == "arizona":
+        return arizona.handle(text)
     if agent_name == "unknown":
         return "Bailey: ไม่แน่ใจว่าต้องส่งให้ใคร ลองพิมพ์ชื่อ agent นำหน้า เช่น 'Lexie: ...' หรือ 'April: ...'"
     return f"⏳ {agent_name.capitalize()} ยังไม่พร้อมใช้งาน — Phase 2"

@@ -4,7 +4,15 @@ _AGENT_PREFIXES = ["april", "lexie", "george", "arizona"]
 
 _APRIL_KEYWORDS = ["summary", "สรุป", "balance", "บัญชี"]
 _GEORGE_KEYWORDS = ["เที่ยว", "ทริป", "จอง", "บิน", "นัด", "ตั๋ว", "โรงแรม", "passport", "วีซ่า", "checklist"]
-_ARIZONA_KEYWORDS = ["เครียด", "เหนื่อย", "กังวล", "stuck", "overwhelmed", "tired", "เศร้า", "ท้อ", "หนักใจ", "อยากคุย"]
+_ARIZONA_KEYWORDS = [
+    # negative
+    "เครียด", "เหนื่อย", "กังวล", "stuck", "overwhelmed", "tired",
+    "เศร้า", "ท้อ", "หนักใจ", "อยากคุย", "หดหู่", "เบื่อ", "โกรธ", "กลัว",
+    # positive
+    "สบายใจ", "มีความสุข", "ดีใจ", "ภูมิใจ", "ตื่นเต้น", "ปลื้ม", "happy", "excited",
+    # general emotional
+    "รู้สึก", "feel", "อารมณ์", "ความรู้สึก", "อยากระบาย",
+]
 _LEXIE_KEYWORDS = ["ไอเดีย", "จด", "จำไว้", "โน้ต", "note", "idea", "เพิ่งคิด", "บันทึกไว้"]
 
 

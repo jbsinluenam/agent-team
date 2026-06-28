@@ -1,5 +1,5 @@
 import json
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from agents.arizona import handle, _detect_intent, _extract_recall_topic
 
 

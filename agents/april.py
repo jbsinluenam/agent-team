@@ -116,8 +116,10 @@ def _record_expense(result: dict, client: SheetsClient) -> str:
         new_balance = client.update_account_balance(account, delta)
         if new_balance is not None:
             account_line += f" (คงเหลือ {new_balance:,.0f} บาท)"
+        else:
+            account_line += f"\n⚠️ ไม่พบบัญชี {account} — ยอดไม่ถูกอัพเดท"
     except Exception as e:
-        print(f"[april] warning: {e}")
+        account_line += f"\n⚠️ อัพเดทยอดไม่สำเร็จ — {e}"
 
     budget_line = ""
     try:

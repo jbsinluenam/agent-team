@@ -84,6 +84,20 @@ def test_balance_keyword():
     assert "KTC ROP" in result
 
 
+def test_expense_deducts_paotung():
+    client = make_client(new_balance=381.0)
+    result = handle("ข้าว 91 เป๋าตัง", client)
+    assert "Paotung" in result
+    assert "381" in result
+    client.update_account_balance.assert_called_once_with("Paotung", -91.0)
+
+
+def test_expense_warns_when_account_not_found():
+    client = make_client(new_balance=None)
+    result = handle("กาแฟ 65 เป๋าตัง", client)
+    assert "ไม่พบบัญชี" in result
+
+
 def test_unrecognized_returns_help():
     client = make_client()
     result = handle("สวัสดี", client)

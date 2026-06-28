@@ -16,8 +16,9 @@ PAYMENT_MAP = {
     "cardx": "CardX",
     "cash": "Cash",
     "เงินสด": "Cash",
-    "paotang": "Paotang",
-    "เป๋าตัง": "Paotang",
+    "paotang": "Paotung",
+    "เป๋าตัง": "Paotung",
+    "paotung": "Paotung",
 }
 
 PAYMENT_TO_ACCOUNT = {
@@ -26,5 +27,5 @@ PAYMENT_TO_ACCOUNT = {
     "TTB Absolute": "TTB Absolute",
     "CardX": "CardX",
     "Cash": "Cash",
-    "Paotang": "Paotang",
+    "Paotung": "Paotung",
 }

@@ -10,5 +10,7 @@ for _key in [
     "NOTION_IDEAS_DB_ID",
     "NOTION_TRIPS_DB_ID",
     "NOTION_BOOKINGS_DB_ID",
+    "ANTHROPIC_API_KEY",
+    "NOTION_MOOD_LOG_DB_ID",
 ]:
     os.environ.setdefault(_key, "test")

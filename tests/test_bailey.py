@@ -125,6 +125,7 @@ def test_dispatch_unknown_calls_layer3():
     with patch("router.layer3._get_llm", return_value=mock_llm):
         agent, text = dispatch("สวัสดี")
     assert agent == "arizona"
+    assert text == "สวัสดี"  # original message, not empty reply
 
 
 def test_dispatch_unknown_direct_reply():

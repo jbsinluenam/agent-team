@@ -48,5 +48,6 @@ def dispatch(raw: str) -> tuple[str, str]:
         agent_name = route(raw)
         text = raw
     if agent_name == "unknown":
-        agent_name, text = layer3.classify(raw)
+        agent_name, layer3_reply = layer3.classify(raw)
+        text = layer3_reply if agent_name == "direct" else raw
     return agent_name, text

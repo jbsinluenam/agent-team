@@ -33,3 +33,9 @@ def test_handle_message_routes_to_arizona():
         result = bot.handle_message("Arizona: เครียดมาก")
         assert result == "arizona response"
         mock_arizona.assert_called_once_with("เครียดมาก")
+
+
+def test_handle_message_direct_returns_layer3_reply():
+    with patch("router.bailey.dispatch", return_value=("direct", "ยินดีเลย!")):
+        result = bot.handle_message("ขอบคุณนะ")
+    assert result == "ยินดีเลย!"

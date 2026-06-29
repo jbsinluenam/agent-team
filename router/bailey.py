@@ -1,4 +1,5 @@
 from core.parser import parse
+import router.layer3 as layer3
 
 _AGENT_PREFIXES = ["april", "lexie", "george", "arizona"]
 
@@ -46,4 +47,6 @@ def dispatch(raw: str) -> tuple[str, str]:
     if agent_name is None:
         agent_name = route(raw)
         text = raw
+    if agent_name == "unknown":
+        agent_name, text = layer3.classify(raw)
     return agent_name, text

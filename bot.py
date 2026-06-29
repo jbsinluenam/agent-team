@@ -33,6 +33,8 @@ TELEGRAM_SECRET = os.environ.get("TELEGRAM_WEBHOOK_SECRET", "")
 def handle_message(raw_text: str) -> str:
     agent_name, text = bailey.dispatch(raw_text)
 
+    if agent_name == "direct":
+        return text
     if agent_name == "april":
         return april.handle(text)
     if agent_name == "lexie":

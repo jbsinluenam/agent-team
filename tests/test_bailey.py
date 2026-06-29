@@ -100,9 +100,11 @@ def test_dispatch_no_prefix_finance():
 
 
 def test_dispatch_no_prefix_unknown():
-    agent, text = dispatch("สวัสดี")
+    # layer3 is called when route returns unknown; with no API key it returns ("unknown", "")
+    from unittest.mock import patch
+    with patch("router.layer3.classify", return_value=("unknown", "")):
+        agent, text = dispatch("สวัสดี")
     assert agent == "unknown"
-    assert text == "สวัสดี"
 
 
 def test_dispatch_strips_prefix_before_routing():
@@ -110,3 +112,28 @@ def test_dispatch_strips_prefix_before_routing():
     agent, text = dispatch("April: สวัสดี")
     assert agent == "april"
     assert text == "สวัสดี"
+
+
+# --- layer3 integration ---
+
+def test_dispatch_unknown_calls_layer3():
+    from unittest.mock import patch, MagicMock
+    mock_llm = MagicMock()
+    msg = MagicMock()
+    msg.content = [MagicMock(text='{"agent": "arizona", "reply": ""}')]
+    mock_llm.messages.create.return_value = msg
+    with patch("router.layer3._get_llm", return_value=mock_llm):
+        agent, text = dispatch("สวัสดี")
+    assert agent == "arizona"
+
+
+def test_dispatch_unknown_direct_reply():
+    from unittest.mock import patch, MagicMock
+    mock_llm = MagicMock()
+    msg = MagicMock()
+    msg.content = [MagicMock(text='{"agent": "direct", "reply": "สวัสดีเช่นกัน!"}')]
+    mock_llm.messages.create.return_value = msg
+    with patch("router.layer3._get_llm", return_value=mock_llm):
+        agent, text = dispatch("สวัสดี")
+    assert agent == "direct"
+    assert text == "สวัสดีเช่นกัน!"

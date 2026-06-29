@@ -48,6 +48,13 @@ def handle_message(raw_text: str) -> str:
     return f"⏳ {agent_name.capitalize()} ยังไม่พร้อมใช้งาน — Phase 2"
 
 
+# --- Health check ---
+
+@app.route("/health", methods=["GET"])
+def health():
+    return "OK", 200
+
+
 # --- LINE webhook ---
 
 @app.route("/callback/line", methods=["POST"])
